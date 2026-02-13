@@ -14,7 +14,7 @@ services:
       - sqlserver_data:/var/opt/mssql
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "/opt/mssql-tools/bin/sqlcmd", "-S", "localhost", "-U", "sa", "-P", "root", "-Q", "SELECT 1"]
+      test: ["CMD", "/opt/mssql-tools/bin/sqlcmd", "-S", "localhost", "-U", "sa", "-P", "SqlServer2026!", "-Q", "SELECT 1"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -28,8 +28,7 @@ services:
     ports:
       - "5000:8080"
     depends_on:
-      db:
-        condition: service_healthy
+     - db
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:8080
