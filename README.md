@@ -10,3 +10,7 @@ git clone https://github.com/Juanca666/Prueba_Sistema_Gestion.git
 cd Prueba_Sistema_Gestion
 docker-compose up --build
 
+#Acesos
+Frontend: http://localhost:5000
+Swagger: http://localhost:5000/swagger
+Base de datos: localhost,1433 (sa / SqlServer2026!)
