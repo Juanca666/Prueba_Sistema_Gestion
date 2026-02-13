@@ -1,0 +1,6 @@
+@SistemaGestionPeliculas_HostAddress = http://localhost:5154
+
+GET {{SistemaGestionPeliculas_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

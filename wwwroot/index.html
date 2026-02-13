@@ -1,0 +1,638 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema Gestion de Películas</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: black;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            color: #000000;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 2rem;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 2rem;
+        }
+
+        .form-card {
+            background: #fffdfd;
+            padding: 1.5rem;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .form-card h2 {
+             color: #000000;
+             margin-bottom: 1.5rem;
+             font-size: 1.3rem;
+             display: flex;
+             align-items: center;
+             gap: 8px;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.3rem;
+            color: #555;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 0.8rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            transition: border 0.3s;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            border-color: #667eea;
+            outline: none;
+        }
+
+        .btn {
+            background: #000000;
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 600;
+            transition: all 0.3s;
+            margin-right: 0.5rem;
+        }
+
+        .btn:hover {
+            background: #e0e0e0;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .btn-delete {
+            background: #dc3545;
+        }
+
+        .btn-delete:hover {
+            background: #c82333;
+        }
+
+        .table-container {
+            background: white;
+            border-radius: 15px;
+            padding: 1rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: #000000;
+            color: white;
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+
+        .status-active {
+            color: #1ad829;
+            font-weight: 600;
+        }
+
+        .status-inactive {
+            color: #f70000;
+            font-weight: 600;
+        }
+
+        .price-cop {
+            color: #1ad829;
+            font-weight: 700;
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: #666;
+        }
+
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            body {
+                padding: 1rem;
+            }
+
+            .container {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>
+            Sistema de Gestión de Películas
+            <span style="font-size: 0.9rem; background: black; color: #ffffff; padding: 0.3rem 0.8rem; border-radius: 20px; margin-left: 1rem;">
+                USD → COP
+            </span>
+        </h1>
+
+        <div id="alert" class="alert"></div>
+
+        <!-- Seccion Peliculas -->
+        <div class="grid">
+            <!-- Formulario Película -->
+            <div class="form-card">
+                <h2 id="formTitle">Agregar Nueva Película</h2>
+
+                <input type="hidden" id="peliculaId">
+
+                <div class="form-group">
+                    <label>Título</label>
+                    <input type="text" id="titulo" placeholder="Ej: Inception" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Descripción</label>
+                    <textarea id="descripcion" rows="3" placeholder="Descripción de la película..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Precio (USD)</label>
+                    <input type="number" id="precio" step="0.01" min="0.01" placeholder="19.99" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Categoría</label>
+                    <select id="categoriaId" required>
+                        <option value="">Cargando categorías...</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Estado</label>
+                    <select id="estado">
+                        <option value="Activo">Activa</option>
+                        <option value="Inactivo">Inactiva</option>
+                    </select>
+                </div>
+
+                <div style="display: flex; gap: 0.5rem;">
+                    <button class="btn" onclick="guardarPelicula()">Guardar</button>
+                    <button class="btn btn-secondary" onclick="limpiarFormulario()">Cancelar</button>
+                </div>
+            </div>
+
+            <!-- Listado Películas -->
+            <div class="table-container">
+                <h2 style="color: #000000; margin-bottom: 1rem; display: flex; align-items: center; gap: 8px;">
+                    Catálogo de Películas
+                </h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Título</th>
+                            <th>USD</th>
+                            <th>COP</th>
+                            <th>Categoría</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaPeliculas">
+                        <tr>
+                            <td colspan="6" class="loading">Cargando películas...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Seccion Categoria  -->
+        <div style="margin-top: 3rem;">
+            <hr style="border: 1px solid #e0e0e0; margin-bottom: 2rem;">
+
+            <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 2rem;">
+
+                <!-- Formulario Categoría -->
+                <div class="form-card">
+                    <h2 id="categoriaFormTitle">Agregar Categoría</h2>
+
+                    <input type="hidden" id="categoriaId">
+
+                    <div class="form-group">
+                        <label>Nombre de Categoría</label>
+                        <input type="text" id="categoriaNombre" placeholder="Ej: Acción, Comedia, Drama" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Descripción</label>
+                        <textarea id="categoriaDescripcion" rows="2" placeholder="Descripción de la categoría..."></textarea>
+                    </div>
+
+                    <div style="display: flex; gap: 0.5rem;">
+                        <button class="btn" onclick="guardarCategoria()">Guardar Categoría</button>
+                        <button class="btn btn-secondary" onclick="limpiarFormularioCategoria()">Cancelar</button>
+                    </div>
+                </div>
+
+                <!-- Listado Categorías -->
+                <div class="table-container">
+                    <h2 style="color: #000000; margin-bottom: 1rem;">Listado de Categorías</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Descripción</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaCategorias">
+                            <tr>
+                                <td colspan="3" class="loading">Cargando categorías...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        //Configuracion Api
+        const API_URL = window.location.hostname === 'localhost' ? '/api' : '/api';
+
+        //Alertas
+        function mostrarAlerta(mensaje, tipo) {
+            const alerta = document.getElementById('alert');
+            alerta.className = `alert alert-${tipo}`;
+            alerta.textContent = mensaje;
+            alerta.style.display = 'block';
+            setTimeout(() => {
+                alerta.style.display = 'none';
+            }, 5000);
+        }
+
+        //Categorias
+        async function cargarCategorias() {
+            try {
+                const response = await fetch(`${API_URL}/categorias`);
+                if (!response.ok) throw new Error('Error al cargar categorías');
+
+                const categorias = await response.json();
+
+                // Cargar tabla de categorías
+                const tbody = document.getElementById('tablaCategorias');
+                if (categorias.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="3" style="text-align: center;">No hay categorías</td></tr>';
+                } else {
+                    tbody.innerHTML = categorias.map(c => `
+                                    <tr>
+                                        <td><strong>${c.nombre}</strong></td>
+                                        <td><strong>${c.descripcion || '-'}</strong></td>
+                                        <td>
+                                            <button class="btn" style="padding: 0.4rem 0.8rem;" onclick="editarCategoria(${c.id})">Editar</button>
+                                            <button class="btn btn-delete" style="padding: 0.4rem 0.8rem;" onclick="eliminarCategoria(${c.id})">Eliminar</button>
+                                        </td>
+                                    </tr>
+                                `).join('');
+                }
+
+                // Cargar select de categorías para películas
+                const select = document.getElementById('categoriaId');
+                select.innerHTML = '<option value="">Seleccione una categoría</option>';
+                categorias.forEach(cat => {
+                    select.innerHTML += `<option value="${cat.id}">${cat.nombre}</option>`;
+                });
+
+            } catch (error) {
+                console.error('Error:', error);
+                mostrarAlerta('Error al cargar categorías', 'error');
+            }
+        }
+
+        async function guardarCategoria() {
+            const id = document.getElementById('categoriaId').value;
+            const nombre = document.getElementById('categoriaNombre').value.trim();
+            const descripcion = document.getElementById('categoriaDescripcion').value.trim();
+
+            if (!nombre) {
+                mostrarAlerta('El nombre de la categoría es obligatorio', 'error');
+                return;
+            }
+
+            const categoria = {
+                nombre: nombre,
+                descripcion: descripcion || null
+            };
+
+            try {
+                const url = id ? `${API_URL}/categorias/${id}` : `${API_URL}/categorias`;
+                const method = id ? 'PUT' : 'POST';
+
+                const response = await fetch(url, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(categoria)
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Error al guardar');
+                }
+
+                mostrarAlerta(
+                    id ? 'Categoría actualizada' : 'Categoría creada',
+                    'success'
+                );
+
+                limpiarFormularioCategoria();
+                await cargarCategorias();
+
+            } catch (error) {
+                console.error('Error:', error);
+                mostrarAlerta(error.message, 'error');
+            }
+        }
+
+        async function editarCategoria(id) {
+            try {
+                const response = await fetch(`${API_URL}/categorias/${id}`);
+                if (!response.ok) throw new Error('Error al cargar la categoría');
+
+                const categoria = await response.json();
+
+                document.getElementById('categoriaId').value = categoria.id;
+                document.getElementById('categoriaNombre').value = categoria.nombre;
+                document.getElementById('categoriaDescripcion').value = categoria.descripcion || '';
+                document.getElementById('categoriaFormTitle').innerHTML = '✏️ Editando: ' + categoria.nombre;
+
+                document.querySelector('#categoriaFormTitle').scrollIntoView({ behavior: 'smooth' });
+
+            } catch (error) {
+                console.error('Error:', error);
+                mostrarAlerta('Error al cargar la categoría', 'error');
+            }
+        }
+
+        async function eliminarCategoria(id) {
+            if (!confirm('¿Está seguro de eliminar esta categoría?')) return;
+
+            try {
+                const response = await fetch(`${API_URL}/categorias/${id}`, {
+                    method: 'DELETE'
+                });
+
+                if (!response.ok) {
+                    if (response.status === 400) {
+                        const error = await response.json();
+                        mostrarAlerta(error.error || 'No se puede eliminar: tiene películas asociadas', 'error');
+                        return;
+                    }
+                    throw new Error('Error al eliminar');
+                }
+
+                mostrarAlerta('Categoría eliminada', 'success');
+                await cargarCategorias();
+
+            } catch (error) {
+                console.error('Error:', error);
+                mostrarAlerta('Error al eliminar la categoría', 'error');
+            }
+        }
+
+        function limpiarFormularioCategoria() {
+            document.getElementById('categoriaId').value = '';
+            document.getElementById('categoriaNombre').value = '';
+            document.getElementById('categoriaDescripcion').value = '';
+            document.getElementById('categoriaFormTitle').innerHTML = 'Agregar Categoría';
+        }
+
+        //Películas
+        async function cargarPeliculas() {
+            try {
+                const response = await fetch(`${API_URL}/peliculas`);
+                if (!response.ok) throw new Error('Error al cargar películas');
+
+                const peliculas = await response.json();
+                const tbody = document.getElementById('tablaPeliculas');
+
+                if (peliculas.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 2rem;">No hay películas registradas</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = peliculas.map(p => `
+                                <tr>
+                                    <td><strong>${p.titulo}</strong></td>
+                                    <td class="price-cop">$${p.precio?.toFixed(2) || '0.00'}</td>
+                                    <td class="price-cop">$${(p.precioCop || 0).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ".")}</td>
+                                    <td><strong>${p.categoriaNombre || '-'}</strong></td>
+                                    <td>
+                                        <span class="${p.estado === 'Activo' ? 'status-active' : 'status-inactive'}">
+                                            ${p.estado || 'Activo'}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <button class="btn" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;" onclick="editarPelicula(${p.id})">Editar</button>
+                                        <button class="btn btn-delete" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;" onclick="eliminarPelicula(${p.id})">Eliminar</button>
+                                    </td>
+                                </tr>
+                            `).join('');
+
+            } catch (error) {
+                console.error('Error:', error);
+                mostrarAlerta('Error al cargar películas', 'error');
+            }
+        }
+
+        async function guardarPelicula() {
+            const id = document.getElementById('peliculaId').value;
+            const titulo = document.getElementById('titulo').value.trim();
+            const descripcion = document.getElementById('descripcion').value.trim();
+            const precio = parseFloat(document.getElementById('precio').value);
+            const categoriaId = parseInt(document.getElementById('categoriaId').value);
+            const estado = document.getElementById('estado').value;
+
+            if (!titulo) {
+                mostrarAlerta('El título es obligatorio', 'error');
+                return;
+            }
+
+            if (!precio || precio <= 0) {
+                mostrarAlerta('El precio debe ser mayor a 0', 'error');
+                return;
+            }
+
+            if (!categoriaId) {
+                mostrarAlerta('Debe seleccionar una categoría', 'error');
+                return;
+            }
+
+            const pelicula = {
+                titulo: titulo,
+                descripcion: descripcion,
+                precio: precio,
+                categoriaId: categoriaId,
+                estado: estado === 'Activo' ? 0 : 1
+            };
+
+            try {
+                const url = id ? `${API_URL}/peliculas/${id}` : `${API_URL}/peliculas`;
+                const method = id ? 'PUT' : 'POST';
+
+                const response = await fetch(url, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(pelicula)
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Error al guardar');
+                }
+
+                mostrarAlerta(id ? 'Película actualizada' : 'Película creada', 'success');
+                limpiarFormulario();
+                await cargarPeliculas();
+                await cargarCategorias();
+
+            } catch (error) {
+                console.error('ERROR:', error);
+                mostrarAlerta(error.message, 'error');
+            }
+        }
+
+        async function editarPelicula(id) {
+            try {
+                const response = await fetch(`${API_URL}/peliculas/${id}`);
+                if (!response.ok) throw new Error('Error al cargar la película');
+
+                const pelicula = await response.json();
+
+                document.getElementById('peliculaId').value = pelicula.id;
+                document.getElementById('titulo').value = pelicula.titulo;
+                document.getElementById('descripcion').value = pelicula.descripcion || '';
+                document.getElementById('precio').value = pelicula.precio;
+                document.getElementById('categoriaId').value = pelicula.categoriaId;
+                document.getElementById('estado').value = pelicula.estado === 0 ? 'Activo' : 'Inactivo';
+                document.getElementById('formTitle').innerHTML = '✏️ Editando: ' + pelicula.titulo;
+
+            } catch (error) {
+                console.error('Error al editar:', error);
+                mostrarAlerta('Error al cargar la película para editar', 'error');
+            }
+        }
+
+        async function eliminarPelicula(id) {
+            if (!confirm('¿Está seguro de eliminar esta película?')) return;
+
+            try {
+                const response = await fetch(`${API_URL}/peliculas/${id}`, {
+                    method: 'DELETE'
+                });
+
+                if (!response.ok) throw new Error('Error al eliminar');
+
+                mostrarAlerta('Película eliminada exitosamente', 'success');
+                await cargarPeliculas();
+
+            } catch (error) {
+                console.error('Error:', error);
+                mostrarAlerta('Error al eliminar la película', 'error');
+            }
+        }
+
+        function limpiarFormulario() {
+            document.getElementById('peliculaId').value = '';
+            document.getElementById('titulo').value = '';
+            document.getElementById('descripcion').value = '';
+            document.getElementById('precio').value = '';
+            document.getElementById('categoriaId').value = '';
+            document.getElementById('estado').value = 'Activo';
+            document.getElementById('formTitle').innerHTML = 'Agregar Nueva Película';
+        }
+
+        // Cargar datos al iniciar
+        document.addEventListener('DOMContentLoaded', () => {
+            cargarCategorias();
+            cargarPeliculas();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,43 @@
+
+
+services:
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: SistemaGestionPeliculasDB
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=SqlServer2026!
+      - MSSQL_PID=Express
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlserver_data:/var/opt/mssql
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "/opt/mssql-tools/bin/sqlcmd", "-S", "localhost", "-U", "sa", "-P", "root", "-Q", "SELECT 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: SistemaGestionPeliculas
+    ports:
+      - "5000:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__DefaultConnection=Server=db;Database=GestionPeliculasDB;User Id=sa;Password=SqlServer2026!;TrustServerCertificate=true;
+      - LogSettings__Directory=/app/logs
+    volumes:
+      - ./logs:/app/logs
+    restart: unless-stopped
+
+volumes:
+  sqlserver_data:
