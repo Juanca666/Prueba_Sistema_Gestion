@@ -14,3 +14,11 @@ docker-compose up --build
 Frontend: http://localhost:5000
 Swagger: http://localhost:5000/swagger
 Base de datos: localhost,1433 (sa / SqlServer2026!)
+
+#Funcionalidades
+CRUD de Categorías y Películas
+Conversión automática USD → COP
+Logs de creación y modificación
+Datos de prueba precargados
+API documentada con Swagger
+Frontend básico funcional
